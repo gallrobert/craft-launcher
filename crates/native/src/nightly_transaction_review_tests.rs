@@ -138,6 +138,7 @@ fn retry(lease: &Lease, record: &Record) {
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_returned_metadata_error_preserves_sealed_plan_and_retry() {
     const TEST: &str = "review_returned_metadata_error_preserves_sealed_plan_and_retry";
     if isolated(TEST) {
@@ -175,6 +176,7 @@ fn review_returned_metadata_error_preserves_sealed_plan_and_retry() {
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_returned_plan_error_cannot_publish_clean_with_the_wrong_phase() {
     const TEST: &str = "review_returned_plan_error_cannot_publish_clean_with_the_wrong_phase";
     if isolated(TEST) {
@@ -244,6 +246,7 @@ fn review_returned_plan_error_cannot_publish_clean_with_the_wrong_phase() {
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_live_created_node_admission_and_registration_failures_do_not_orphan_the_slot() {
     const TEST: &str = "review_live_created_node_admission_and_registration_failures_do_not_orphan_the_slot";
     if isolated(TEST) {
@@ -284,6 +287,7 @@ fn review_live_created_node_admission_and_registration_failures_do_not_orphan_th
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_registration_failure_preserves_unknown_arrivals_without_adopting_them() {
     const TEST: &str = "review_registration_failure_preserves_unknown_arrivals_without_adopting_them";
     if isolated(TEST) {
@@ -311,6 +315,7 @@ fn review_registration_failure_preserves_unknown_arrivals_without_adopting_them(
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_plan_and_metadata_admission_reserve_terminal_clean_inside_the_same_bound() {
     const TEST: &str = "review_plan_and_metadata_admission_reserve_terminal_clean_inside_the_same_bound";
     if isolated(TEST) {
@@ -363,6 +368,7 @@ fn review_plan_and_metadata_admission_reserve_terminal_clean_inside_the_same_bou
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_unknown_truncated_restart_journal_remains_unmodified_and_unadopted() {
     const TEST: &str = "review_unknown_truncated_restart_journal_remains_unmodified_and_unadopted";
     if isolated(TEST) {
@@ -383,6 +389,7 @@ fn review_unknown_truncated_restart_journal_remains_unmodified_and_unadopted() {
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_unreconciled_live_append_cannot_retire_or_rephase_its_journal() {
     const TEST: &str = "review_unreconciled_live_append_cannot_retire_or_rephase_its_journal";
     if isolated(TEST) {
@@ -422,6 +429,7 @@ fn review_unreconciled_live_append_cannot_retire_or_rephase_its_journal() {
 
 #[cfg(unix)]
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_test_owned_alias_root_is_resolved_but_production_alias_is_refused() {
     const TEST: &str = "review_test_owned_alias_root_is_resolved_but_production_alias_is_refused";
     if isolated(TEST) {
@@ -513,6 +521,7 @@ fn barrier_removed(paths: &Paths, record: &Record) {
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_manifest_directory_barrier_preserves_live_backups_until_successful_retry() {
     const TEST: &str = "review_manifest_directory_barrier_preserves_live_backups_until_successful_retry";
     if isolated(TEST) {
@@ -536,6 +545,7 @@ fn review_manifest_directory_barrier_preserves_live_backups_until_successful_ret
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_manifest_directory_barrier_preserves_fresh_lease_backups_until_successful_retry() {
     const TEST: &str = "review_manifest_directory_barrier_preserves_fresh_lease_backups_until_successful_retry";
     if isolated(TEST) {
@@ -561,6 +571,7 @@ fn review_manifest_directory_barrier_preserves_fresh_lease_backups_until_success
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn review_manifest_directory_barrier_preserves_ordinary_success_and_rollback() {
     const TEST: &str = "review_manifest_directory_barrier_preserves_ordinary_success_and_rollback";
     if isolated(TEST) {
@@ -677,6 +688,7 @@ fn review_lock_guard_retirement_releases_mutation_and_manifest_with_retained_des
 }
 
 #[test]
+#[cfg_attr(target_os = "freebsd", ignore = "Nightly isolation is not staged on FreeBSD; refusal is tested separately")]
 fn an_empty_journal_left_before_its_header_does_not_lock_out_later_leases() {
     let temp = tempfile::tempdir().unwrap();
     let (paths, record) = fixture(temp.path());
@@ -726,4 +738,17 @@ fn record_paths_are_made_relative_to_the_records_own_proven_root() {
     assert_eq!(relative, [PathBuf::from("photocraft"), PathBuf::from("docs/NOTICE")]);
     let elsewhere = Record { path: "/data/apps/other/photocraft".into(), ..record.clone() };
     assert!(record_root_with(&elsewhere, owned, Path::new("photocraft"), same).is_err(), "a record outside the owned folder is still refused");
+}
+
+#[cfg(target_os = "freebsd")]
+#[test]
+fn unsupported_host_refuses_nightly_lease_without_mutation() {
+    let temp = tempfile::tempdir().unwrap();
+    let (paths, record) = fixture(temp.path());
+    let journal = paths.data.join(".nightly-photocraft-journal-v1.jsonl");
+    std::fs::write(&journal, b"preserve this journal").unwrap();
+    let result = Lease::acquire(&paths, adapter());
+    assert!(matches!(result, Err(ref error) if error.contains("No nightly isolation contract")));
+    assert_eq!(std::fs::read(&journal).unwrap(), b"preserve this journal");
+    kept(&paths, &record);
 }

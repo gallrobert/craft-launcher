@@ -24,7 +24,13 @@ fn selection_ui_and_install_gate_agree_and_failed_refresh_retains_stale_success(
     let (_temp, shared, paths, platform) = fixture();
     complete(&shared, &paths, platform, 20);
     assert_eq!(installable_event(app(), &shared, Some(platform), None), Some(Event::Installable { app: "photocraft".into(), installable: true }));
-    assert!(nightly_install_plan(app(), &shared, &paths, Some(platform)).is_ok());
+    // The synthetic Linux release can be inspected on FreeBSD, but that host has
+    // no staged Nightly isolation contract and must refuse an actual installation.
+    if cfg!(target_os = "freebsd") {
+        assert!(nightly_install_plan(app(), &shared, &paths, Some(platform)).is_err());
+    } else {
+        assert!(nightly_install_plan(app(), &shared, &paths, Some(platform)).is_ok());
+    }
     let key = nightly_lookup::key(app(), platform);
     let verified_at = shared.nightly_state.lock().unwrap().record(&key).verified_at;
     let previous = shared.latest.lock().unwrap().get("photocraft").cloned().unwrap();

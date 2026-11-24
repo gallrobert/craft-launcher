@@ -493,6 +493,15 @@ mod move_identity_tests {
             }))
         });
         assert!(dir.move_to(Path::new("owned"), &dir, Path::new("destination"), &expected).is_err());
+        if cfg!(target_os = "freebsd") {
+            // No exclusive rename adapter is staged: the move must fail before
+            // touching either name, and the post-move hook must not have run.
+            REVIEW_AFTER_EXCLUSIVE_MOVE.with(|hook| assert!(hook.borrow_mut().take().is_some()));
+            assert_eq!(std::fs::read(root.join("owned")).unwrap(), b"owned bytes");
+            assert!(!root.join("destination").exists());
+            assert!(!root.join("moved aside").exists());
+            return;
+        }
         assert!(!root.join("owned").exists(), "the foreign entry must not be renamed into the owned name");
         assert_eq!(std::fs::read(root.join("destination")).unwrap(), b"foreign arriving bytes");
         assert_eq!(std::fs::read(root.join("moved aside")).unwrap(), b"owned bytes");
